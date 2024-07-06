@@ -1,16 +1,13 @@
-import RouteError from "@src/common/RouteError";
-import HttpStatusCodes from "@src/common/HttpStatusCodes";
-
 import UserRepo from "@src/repos/UserRepo";
 import { User } from "@src/models/User";
 import { RegisterRequest } from "@src/models/RegisterRequest";
 import { ApiResponse } from "@src/models/ApiResponse";
 import { LoginRequest } from "@src/models/LoginRequest";
 import { LoginResponse } from "@src/models/LoginResponse";
-import { UserDocument } from "@src/repos/mongodb";
 import { ChangePswRequest } from "@src/models/ChangePswRequest";
 import { ValidateRefreshTokenRequest } from "@src/models/ValidateRefreshTokenRequest";
 import { ValidateRefreshTokenResponse } from "@src/models/ValidateRefreshTokenRespone";
+import { GetDummnyDataResponse } from "@src/models/GetDummnyDataResponse";
 
 // **** Variables **** //
 
@@ -195,6 +192,45 @@ async function validateRefreshToken(
   };
 }
 
+/**
+ * Get Dummny data.
+ */
+async function getDummnyData(
+  accessToken: string
+): Promise<GetDummnyDataResponse> {
+  const verifyRes = verifyAccessToken(accessToken);
+
+  console.log(verifyRes);
+  if (!verifyRes.success && verifyRes.error === "jwt expired") {
+    return { httpCode: 202, apiMsg: verifyRes.error };
+  } else if (!verifyRes.success && verifyRes.error === "invalid token") {
+    return { httpCode: 404, apiMsg: verifyRes.error };
+  }
+
+  return {
+    httpCode: 200,
+    apiMsg: "get successfully",
+    register: {
+      username: "david",
+      password: "123456",
+      avatar: "base64",
+    },
+    login: {
+      username: "david",
+      password: "123456",
+    },
+    changePassword: {
+      username: "david",
+      oldPassword: "123456",
+      newPassword: "123",
+    },
+    validateRefreshToken: {
+      refreshToken:
+        "please refer to the response in login api. If it is expired, please use validate refresh token to regenerate a new one",
+    },
+  };
+}
+
 // **** Export default **** //
 
 export default {
@@ -202,4 +238,5 @@ export default {
   login,
   changePassword,
   validateRefreshToken,
+  getDummnyData,
 } as const;

@@ -10,6 +10,6 @@ export default {
     ChangePsw: "/change-password",
     Login: "/login",
     ValidateRefreshToken: "/validate-refresh-token",
-    DummyData: "/dummny-data",
+    DummnyData: "/dummny-data",
   },
 } as const;

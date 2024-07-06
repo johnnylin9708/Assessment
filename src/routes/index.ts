@@ -42,6 +42,13 @@ userRouter.post(
   UserRoutes.validateRefreshToken
 );
 
+// Get Dummny data
+userRouter.get(
+  Paths.Users.DummnyData,
+  // validate(["user", User.isUser])
+  UserRoutes.getDummnyData
+);
+
 // Add UserRouter
 apiRouter.use(Paths.Users.Base, userRouter);
 

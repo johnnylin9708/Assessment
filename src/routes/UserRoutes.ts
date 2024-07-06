@@ -62,6 +62,17 @@ async function validateRefreshToken(
   return res.status(apiRes.httpCode).json(apiRes);
 }
 
+/**
+ * Get Dummny data on postman
+ */
+async function getDummnyData(req: IReq, res: IRes) {
+  const { authorization } = req.headers;
+
+  const accessToken = authorization && authorization?.replace("Bearer ", "");
+  const apiRes = await UserService.getDummnyData(accessToken || "");
+  return res.status(apiRes.httpCode).json(apiRes);
+}
+
 // **** Export default **** //
 
 export default {
@@ -69,4 +80,5 @@ export default {
   login,
   changePassword,
   validateRefreshToken,
+  getDummnyData,
 } as const;
