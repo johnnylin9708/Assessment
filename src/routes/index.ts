@@ -35,6 +35,13 @@ userRouter.put(
   UserRoutes.changePassword
 );
 
+// Validate refresh tolken
+userRouter.post(
+  Paths.Users.ValidateRefreshToken,
+  // validate(["user", User.isUser])
+  UserRoutes.validateRefreshToken
+);
+
 // Add UserRouter
 apiRouter.use(Paths.Users.Base, userRouter);
 

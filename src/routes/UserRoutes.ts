@@ -6,6 +6,7 @@ import { IReq, IRes } from "./types/express/misc";
 import { RegisterRequest } from "@src/models/RegisterRequest";
 import { LoginRequest } from "@src/models/LoginRequest";
 import { ChangePswRequest } from "@src/models/ChangePswRequest";
+import { ValidateRefreshTokenRequest } from "@src/models/ValidateRefreshTokenRequest";
 
 // **** Functions **** //
 
@@ -41,13 +42,19 @@ async function login(req: IReq<LoginRequest>, res: IRes) {
 }
 
 /**
- * Delete one user.
+ * Validate Refresh Token.
  */
-// async function delete_(req: IReq, res: IRes) {
-//   const id = +req.params.id;
-//   await UserService.delete(id);
-//   return res.status(HttpStatusCodes.OK).end();
-// }
+async function validateRefreshToken(
+  req: IReq<ValidateRefreshTokenRequest>,
+  res: IRes
+) {
+  const validateRefreshTokenReqBody = req.body;
+
+  const apiRes = await UserService.validateRefreshToken(
+    validateRefreshTokenReqBody
+  );
+  return res.status(apiRes.httpCode).json(apiRes);
+}
 
 // **** Export default **** //
 
@@ -55,8 +62,5 @@ export default {
   register,
   login,
   changePassword,
-  // getAll,
-  // add,
-  // update,
-  // delete: delete_,
+  validateRefreshToken,
 } as const;

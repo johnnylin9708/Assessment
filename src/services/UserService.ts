@@ -9,6 +9,8 @@ import { LoginRequest } from "@src/models/LoginRequest";
 import { LoginResponse } from "@src/models/LoginResponse";
 import { UserDocument } from "@src/repos/mongodb";
 import { ChangePswRequest } from "@src/models/ChangePswRequest";
+import { ValidateRefreshTokenRequest } from "@src/models/ValidateRefreshTokenRequest";
+import { ValidateRefreshTokenResponse } from "@src/models/ValidateRefreshTokenRespone";
 
 // **** Variables **** //
 
@@ -45,38 +47,31 @@ function generateUserId() {
  * token generation and validation
  */
 
-function generateAccessToken(user: UserDocument) {
-  const payload = {
-    id: user.userid,
-    username: user.username,
-  };
-
-  const secret = process.env.JWT_SECRET;
+function generateAccessToken() {
   const options = { expiresIn: process.env.ACCESS_TOKEN_EXPIRES_IN };
 
-  return jwt.sign(payload, secret, options);
+  return jwt.sign({}, process.env.JWT_SECRET, options);
 }
 function verifyAccessToken(token: string) {
-  const secret = process.env.JWT_SECRET;
-
   try {
-    const decoded = jwt.verify(token, secret);
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
     return { success: true, data: decoded };
   } catch (error) {
     return { success: false, error: error.message };
   }
 }
 
-function generateRefreshToken(user: UserDocument) {
-  const payload = {
-    id: user.userid,
-    email: user.username,
-  };
+function refreshAccessToken() {
+  return jwt.sign({}, process.env.JWT_SECRET, {
+    expiresIn: process.env.ACCESS_TOKEN_EXPIRES_IN,
+  });
+}
 
+function generateRefreshToken() {
   const secret = process.env.JWT_SECRET;
   const options = { expiresIn: process.env.REFRESH_TOKEN_EXPIRES_IN };
 
-  return jwt.sign(payload, secret, options);
+  return jwt.sign({}, secret, options);
 }
 
 function verifyRefreshToken(token: string) {
@@ -129,8 +124,8 @@ async function login(loginReq: LoginRequest): Promise<LoginResponse> {
       return {
         httpCode: 200,
         apiMsg: "login successfully",
-        accessToken: generateAccessToken(existedUser),
-        refreshToken: generateRefreshToken(existedUser),
+        accessToken: generateAccessToken(),
+        refreshToken: generateRefreshToken(),
       };
     } else {
       return { httpCode: 204, apiMsg: "invalid password" };
@@ -181,12 +176,31 @@ async function changePassword(
   return { httpCode: 200, apiMsg: "password changed successfully" };
 }
 
+/**
+ * Validate refresh token then generate a new JWT token.
+ */
+async function validateRefreshToken(
+  validateRefreshTokenReq: ValidateRefreshTokenRequest
+): Promise<ValidateRefreshTokenResponse> {
+  const verifyRes = verifyRefreshToken(validateRefreshTokenReq.refreshToken);
+  if (!verifyRes.success) {
+    return { httpCode: 401, apiMsg: verifyRes.error };
+  }
+
+  return {
+    httpCode: 200,
+    apiMsg: "generate new token successfully",
+    accessToken: refreshAccessToken(),
+  };
+}
+
 // **** Export default **** //
 
 export default {
   register,
   login,
   changePassword,
+  validateRefreshToken,
   // getAll,
   // addOne,
   // updateOne,

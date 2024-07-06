@@ -9,6 +9,7 @@ export default {
     Register: "/register",
     ChangePsw: "/change-password",
     Login: "/login",
+    ValidateRefreshToken: "/validate-refresh-token",
     DummyData: "/dummny-data",
   },
 } as const;
