@@ -3,15 +3,24 @@ import HttpStatusCodes from "@src/common/HttpStatusCodes";
 
 import UserRepo from "@src/repos/UserRepo";
 import { User } from "@src/models/User";
-import { ApiResponse } from "@src/routes/types/types";
+import { RegisterRequest } from "@src/models/RegisterRequest";
+import { ApiResponse } from "@src/models/ApiResponse";
+import { LoginRequest } from "@src/models/LoginRequest";
+import { LoginResponse } from "@src/models/LoginResponse";
+import { UserDocument } from "@src/repos/mongodb";
 
 // **** Variables **** //
 
 export const USER_NOT_FOUND_ERR = "User not found";
 const crypto = require("crypto");
+const jwt = require("jsonwebtoken");
+const { v4: uuidv4 } = require("uuid");
 
 // **** Functions **** //
 
+/**
+ * password encryption
+ */
 function hashPassword(password: string, salt: string) {
   const hash = crypto
     .createHash("sha256")
@@ -25,24 +34,110 @@ function generateSalt() {
 }
 
 /**
+ * UUID
+ */
+function generateUserId() {
+  return uuidv4();
+}
+
+/**
+ * token generation and validation
+ */
+
+function generateAccessToken(user: UserDocument) {
+  const payload = {
+    id: user.userid,
+    username: user.username,
+  };
+
+  const secret = process.env.JWT_SECRET;
+  const options = { expiresIn: process.env.ACCESS_TOKEN_EXPIRES_IN };
+
+  return jwt.sign(payload, secret, options);
+}
+function verifyAccessToken(token: string) {
+  const secret = process.env.JWT_SECRET;
+
+  try {
+    const decoded = jwt.verify(token, secret);
+    return { success: true, data: decoded };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+}
+
+function generateRefreshToken(user: UserDocument) {
+  const payload = {
+    id: user.userid,
+    email: user.username,
+  };
+
+  const secret = process.env.JWT_SECRET;
+  const options = { expiresIn: process.env.REFRESH_TOKEN_EXPIRES_IN };
+
+  return jwt.sign(payload, secret, options);
+}
+
+function verifyRefreshToken(token: string) {
+  const secret = process.env.JWT_SECRET;
+
+  try {
+    const decoded = jwt.verify(token, secret);
+    return { success: true, data: decoded };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+}
+
+/**
  * Register one user.
  */
-async function register(user: User): Promise<ApiResponse> {
+async function register(user: RegisterRequest): Promise<ApiResponse> {
+  const isExisted = await UserRepo.findUser(user);
+
+  if (isExisted) {
+    return { httpCode: 409, apiMsg: "username is existed" };
+  }
+
   const salt = generateSalt();
   user.password = hashPassword(user.password, salt);
-  user.ps = salt;
 
-  return UserRepo.insertUser(user);
+  const userObj: User = {
+    ...user,
+    userid: generateUserId(),
+    ps: salt,
+    isActive: true,
+  };
+
+  await UserRepo.insertUser(userObj);
+  return { httpCode: 201, apiMsg: "register successfully" };
 }
 
 /**
  * Login.
  */
-async function login(user: User): Promise<Boolean> {
-  // const salt = generateSalt();
-  // user.password = hashPassword(user.password, salt);
-  // user.ps = salt;
-  return UserRepo.findUser(user);
+async function login(user: LoginRequest): Promise<LoginResponse> {
+  const existedUser = await UserRepo.findUser(user);
+
+  if (existedUser && existedUser.ps) {
+    const hashPsw = hashPassword(user.password, existedUser.ps);
+
+    if (
+      hashPsw === existedUser.password &&
+      user.username === existedUser.username
+    ) {
+      return {
+        httpCode: 200,
+        apiMsg: "login successfully",
+        accessToken: generateAccessToken(existedUser),
+        refreshToken: generateRefreshToken(existedUser),
+      };
+    } else {
+      return { httpCode: 204, apiMsg: "invalid password" };
+    }
+  }
+
+  return { httpCode: 204, apiMsg: "invalid username" };
 }
 
 /**

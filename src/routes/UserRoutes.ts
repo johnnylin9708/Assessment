@@ -3,17 +3,20 @@ import HttpStatusCodes from "@src/common/HttpStatusCodes";
 import UserService from "@src/services/UserService";
 import { User } from "@src/models/User";
 import { IReq, IRes } from "./types/express/misc";
+import { RegisterRequest } from "@src/models/RegisterRequest";
+import { LoginRequest } from "@src/models/LoginRequest";
 
 // **** Functions **** //
 
 /**
  * Register.
  */
-async function register(req: IReq<User>, res: IRes) {
+async function register(req: IReq<RegisterRequest>, res: IRes) {
   const user = req.body;
 
-  const users = await UserService.register(user);
-  return res.status(HttpStatusCodes.CREATED).json({ users });
+  const apiRes = await UserService.register(user);
+
+  return res.status(apiRes.httpCode).json(apiRes);
 }
 
 /**
@@ -29,11 +32,11 @@ async function changePassword(req: IReq<User>, res: IRes) {
 /**
  * Login.
  */
-async function login(req: IReq<User>, res: IRes) {
+async function login(req: IReq<LoginRequest>, res: IRes) {
   const user = req.body;
 
-  const users = await UserService.login(user);
-  return res.status(HttpStatusCodes.OK).end();
+  const apiRes = await UserService.login(user);
+  return res.status(apiRes.httpCode).json(apiRes);
 }
 
 /**
@@ -49,6 +52,7 @@ async function login(req: IReq<User>, res: IRes) {
 
 export default {
   register,
+  login,
   // getAll,
   // add,
   // update,

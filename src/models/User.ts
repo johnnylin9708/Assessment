@@ -2,18 +2,15 @@ import moment from "moment";
 
 // **** Variables **** //
 
-const INVALID_CONSTRUCTOR_PARAM =
-  "nameOrObj arg must a string or an object " +
-  "with the appropriate user keys.";
-
 // **** Types **** //
 
 export interface User {
+  userid?: string;
   username: string;
   password: string;
-  ps: string;
-  isActive: boolean;
-  avatar: string;
+  ps?: string;
+  isActive?: boolean;
+  avatar?: string;
 }
 
 // **** Functions **** //
@@ -22,6 +19,7 @@ export interface User {
  * Create new User.
  */
 function new_(
+  userid?: string,
   username?: string,
   password?: string,
   ps?: string,
@@ -29,6 +27,7 @@ function new_(
   avatar?: string // id last cause usually set by db
 ): User {
   return {
+    userid: userid ?? "",
     username: username ?? "",
     password: password ?? "",
     ps: ps ?? "",

@@ -1,9 +1,6 @@
-import jsonfile from "jsonfile";
-
-import { User } from "@src/models/User";
+import User from "@src/models/User";
 import { MongoClient } from "mongodb";
 import mongoose, { Schema } from "mongoose";
-import { ApiResponse } from "@src/routes/types/types";
 
 // **** Variables **** //
 
@@ -13,93 +10,76 @@ const client = new MongoClient(uri);
 
 // **** Types **** //
 
-interface IDb {
-  users: User[];
+export interface UserDocument extends Document {
+  userid: string;
+  username: string;
+  password?: string;
+  ps?: string;
+  isActive?: boolean;
+  avatar?: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 // **** Functions **** //
+
+const UserModel = mongoose.model(
+  "users",
+  new Schema({
+    userid: String,
+    username: String,
+    password: String,
+    ps: String,
+    isActive: Boolean,
+    avatar: String,
+  })
+);
 
 /**
  * Insert a user into Document.
  */
 async function insertUser(data: {
+  userid?: String;
   username: String;
   password: String;
-  ps: String;
-  isActive: Boolean;
-  avatar: String;
-}): Promise<ApiResponse> {
-  // async function insertDoc(): Promise<IDb> {
+  ps?: String;
+  isActive?: Boolean;
+  avatar?: String;
+}) {
   try {
-    const UserModel = mongoose.model(
-      "users",
-      new Schema({
-        username: String,
-        password: String,
-        ps: String,
-        isActive: Boolean,
-        avatar: String,
-      })
-    );
-
-    const isExisted = await UserModel.where("username").equals(data.username);
-    if (isExisted.length) {
-      return { httpCode: 409, apiMsg: "username is existed" };
-    }
     const doc = new UserModel(data);
 
-    doc.save().then((res) => {
-      return { httpCode: 201 };
-    });
+    return (await doc.save()) as unknown as UserDocument;
   } catch (error) {
     console.log(error);
+    return null;
   } finally {
     await client.close();
   }
-  return { httpCode: 400, apiMsg: "Bad Request" };
 }
 
 /**
  * Get a user.
  */
 async function findUser(data: {
+  userid?: String;
   username: String;
   password: String;
-  ps: String;
-  isActive: Boolean;
-  avatar: String;
+  ps?: String;
+  isActive?: Boolean;
+  avatar?: String;
 }) {
-  // async function insertDoc(): Promise<IDb> {
   try {
-    const UserModel = mongoose.model(
-      "users",
-      new Schema({
-        username: String,
-        password: String,
-        ps: String,
-        isActive: Boolean,
-        avatar: String,
-      })
-    );
-    const doc = await UserModel.where("username").equals(data.username);
-    if (doc.length) {
-      return true;
-    }
+    return (await UserModel.findOne({
+      username: data.username,
+    })) as unknown as UserDocument;
   } catch (error) {
     console.log(error);
-    return false;
+    return null;
   } finally {
     await client.close();
   }
-  return false;
 }
-
-/**
- * Update the file.
- */
-// function saveDb(db: IDb): Promise<void> {
-//   return jsonfile.writeFile((__dirname + '/' + DB_FILE_NAME), db);
-// }
 
 // **** Export default **** //
 

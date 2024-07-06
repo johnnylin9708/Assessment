@@ -21,6 +21,12 @@ userRouter.post(
   UserRoutes.register
 );
 
+// Login
+userRouter.post(
+  Paths.Users.Login,
+  // validate(["user", User.isUser])
+  UserRoutes.login
+);
 // Change user's password
 // userRouter.put(
 //   Paths.Users.ChangePsw,
