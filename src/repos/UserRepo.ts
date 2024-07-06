@@ -30,10 +30,4 @@ export default {
   insertUser,
   findUser,
   updateUser,
-  // getOne,
-  // persists,
-  // getAll,
-  // add,
-  // update,
-  // delete: delete_,
 } as const;

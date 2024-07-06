@@ -26,8 +26,14 @@ async function register(req: IReq<RegisterRequest>, res: IRes) {
  */
 async function changePassword(req: IReq<ChangePswRequest>, res: IRes) {
   const changePswReqBody = req.body;
+  const { authorization } = req.headers;
 
-  const apiRes = await UserService.changePassword(changePswReqBody);
+  const accessToken = authorization && authorization?.replace("Bearer ", "");
+
+  const apiRes = await UserService.changePassword(
+    changePswReqBody,
+    accessToken || ""
+  );
   return res.status(apiRes.httpCode).json(apiRes);
 }
 

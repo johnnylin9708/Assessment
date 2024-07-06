@@ -139,9 +139,10 @@ async function login(loginReq: LoginRequest): Promise<LoginResponse> {
  * Change Password.
  */
 async function changePassword(
-  changePwsReq: ChangePswRequest
+  changePwsReq: ChangePswRequest,
+  accessToken: string
 ): Promise<ApiResponse> {
-  const verifyRes = verifyAccessToken(changePwsReq.accessToken);
+  const verifyRes = verifyAccessToken(accessToken);
 
   if (!verifyRes.success) {
     return { httpCode: 401, apiMsg: verifyRes.error };
@@ -201,8 +202,4 @@ export default {
   login,
   changePassword,
   validateRefreshToken,
-  // getAll,
-  // addOne,
-  // updateOne,
-  // delete: _delete,
 } as const;
