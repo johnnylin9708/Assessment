@@ -39,12 +39,12 @@ const UserModel = mongoose.model(
  * Insert a user into Document.
  */
 async function insertUser(data: {
-  userid?: String;
-  username: String;
-  password: String;
-  ps?: String;
-  isActive?: Boolean;
-  avatar?: String;
+  userid?: string;
+  username: string;
+  password: string;
+  ps?: string;
+  isActive?: boolean;
+  avatar?: string;
 }) {
   try {
     const doc = new UserModel(data);
@@ -62,12 +62,12 @@ async function insertUser(data: {
  * Get a user.
  */
 async function findUser(data: {
-  userid?: String;
-  username: String;
-  password: String;
-  ps?: String;
-  isActive?: Boolean;
-  avatar?: String;
+  userid?: string;
+  username: string;
+  password: string;
+  ps?: string;
+  isActive?: boolean;
+  avatar?: string;
 }) {
   try {
     return (await UserModel.findOne({
@@ -81,9 +81,40 @@ async function findUser(data: {
   }
 }
 
+/**
+ * Update user info.
+ */
+async function updateUser(data: {
+  userid?: string;
+  username: string;
+  password: string;
+  ps?: string;
+  isActive?: boolean;
+  avatar?: string;
+}) {
+  try {
+    return (await UserModel.updateOne(
+      { userid: data.userid },
+      {
+        $set: {
+          password: data.password,
+          avatar: data.avatar,
+          ps: data.ps,
+        },
+      }
+    )) as unknown as UserDocument;
+  } catch (error) {
+    console.log(error);
+    return null;
+  } finally {
+    await client.close();
+  }
+}
+
 // **** Export default **** //
 
 export default {
   insertUser,
   findUser,
+  updateUser,
 } as const;

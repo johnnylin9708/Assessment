@@ -8,6 +8,7 @@ import { ApiResponse } from "@src/models/ApiResponse";
 import { LoginRequest } from "@src/models/LoginRequest";
 import { LoginResponse } from "@src/models/LoginResponse";
 import { UserDocument } from "@src/repos/mongodb";
+import { ChangePswRequest } from "@src/models/ChangePswRequest";
 
 // **** Variables **** //
 
@@ -92,18 +93,17 @@ function verifyRefreshToken(token: string) {
 /**
  * Register one user.
  */
-async function register(user: RegisterRequest): Promise<ApiResponse> {
-  const isExisted = await UserRepo.findUser(user);
+async function register(registerReq: RegisterRequest): Promise<ApiResponse> {
+  const isExisted = await UserRepo.findUser(registerReq);
 
   if (isExisted) {
     return { httpCode: 409, apiMsg: "username is existed" };
   }
-
   const salt = generateSalt();
-  user.password = hashPassword(user.password, salt);
+  registerReq.password = hashPassword(registerReq.password, salt);
 
   const userObj: User = {
-    ...user,
+    ...registerReq,
     userid: generateUserId(),
     ps: salt,
     isActive: true,
@@ -116,15 +116,15 @@ async function register(user: RegisterRequest): Promise<ApiResponse> {
 /**
  * Login.
  */
-async function login(user: LoginRequest): Promise<LoginResponse> {
-  const existedUser = await UserRepo.findUser(user);
+async function login(loginReq: LoginRequest): Promise<LoginResponse> {
+  const existedUser = await UserRepo.findUser(loginReq);
 
   if (existedUser && existedUser.ps) {
-    const hashPsw = hashPassword(user.password, existedUser.ps);
+    const hashPsw = hashPassword(loginReq.password, existedUser.ps);
 
     if (
       hashPsw === existedUser.password &&
-      user.username === existedUser.username
+      loginReq.username === existedUser.username
     ) {
       return {
         httpCode: 200,
@@ -141,40 +141,52 @@ async function login(user: LoginRequest): Promise<LoginResponse> {
 }
 
 /**
- * Update one user.
+ * Change Password.
  */
-// async function updateOne(user: IUser): Promise<void> {
-//   const persists = await UserRepo.persists(user.id);
-//   if (!persists) {
-//     throw new RouteError(
-//       HttpStatusCodes.NOT_FOUND,
-//       USER_NOT_FOUND_ERR,
-//     );
-//   }
-//   // Return user
-//   return UserRepo.update(user);
-// }
+async function changePassword(
+  changePwsReq: ChangePswRequest
+): Promise<ApiResponse> {
+  const verifyRes = verifyAccessToken(changePwsReq.accessToken);
 
-/**
- * Delete a user by their id.
- */
-// async function _delete(id: number): Promise<void> {
-//   const persists = await UserRepo.persists(id);
-//   if (!persists) {
-//     throw new RouteError(
-//       HttpStatusCodes.NOT_FOUND,
-//       USER_NOT_FOUND_ERR,
-//     );
-//   }
-//   // Delete user
-//   return UserRepo.delete(id);
-// }
+  if (!verifyRes.success) {
+    return { httpCode: 401, apiMsg: verifyRes.error };
+  }
+
+  const userObj = {
+    username: changePwsReq.username,
+    password: changePwsReq.oldPassword,
+  };
+
+  const existedUser = await UserRepo.findUser(userObj);
+
+  if (!existedUser || !existedUser.ps) {
+    return { httpCode: 204, apiMsg: "can't find this user" };
+  }
+  const isOldPswMatched =
+    hashPassword(changePwsReq.oldPassword, existedUser.ps) ===
+    existedUser.password;
+  if (!isOldPswMatched) {
+    return { httpCode: 409, apiMsg: "old password is invalid" };
+  }
+  const salt = generateSalt();
+
+  const newUserObj = {
+    userid: existedUser.userid,
+    username: existedUser.username,
+    password: hashPassword(changePwsReq.newPassword, salt),
+    ps: salt,
+  };
+  UserRepo.updateUser(newUserObj);
+
+  return { httpCode: 200, apiMsg: "password changed successfully" };
+}
 
 // **** Export default **** //
 
 export default {
   register,
   login,
+  changePassword,
   // getAll,
   // addOne,
   // updateOne,

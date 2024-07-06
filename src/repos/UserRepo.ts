@@ -17,11 +17,19 @@ async function findUser(user: User): Promise<UserDocument | null> {
   return await orm.findUser(user);
 }
 
+/**
+ * Update user data
+ */
+async function updateUser(user: User): Promise<UserDocument | null> {
+  return await orm.updateUser(user);
+}
+
 // **** Export default **** //
 
 export default {
   insertUser,
   findUser,
+  updateUser,
   // getOne,
   // persists,
   // getAll,

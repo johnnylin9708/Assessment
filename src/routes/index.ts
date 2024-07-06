@@ -27,12 +27,13 @@ userRouter.post(
   // validate(["user", User.isUser])
   UserRoutes.login
 );
+
 // Change user's password
-// userRouter.put(
-//   Paths.Users.ChangePsw,
-//   validate(["user", User.isUser])
-//   // UserRoutes.update
-// );
+userRouter.put(
+  Paths.Users.ChangePsw,
+  // validate(["user", User.isUser])
+  UserRoutes.changePassword
+);
 
 // Add UserRouter
 apiRouter.use(Paths.Users.Base, userRouter);

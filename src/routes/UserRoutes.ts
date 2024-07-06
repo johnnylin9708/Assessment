@@ -5,6 +5,7 @@ import { User } from "@src/models/User";
 import { IReq, IRes } from "./types/express/misc";
 import { RegisterRequest } from "@src/models/RegisterRequest";
 import { LoginRequest } from "@src/models/LoginRequest";
+import { ChangePswRequest } from "@src/models/ChangePswRequest";
 
 // **** Functions **** //
 
@@ -12,9 +13,9 @@ import { LoginRequest } from "@src/models/LoginRequest";
  * Register.
  */
 async function register(req: IReq<RegisterRequest>, res: IRes) {
-  const user = req.body;
+  const registerReqBody = req.body;
 
-  const apiRes = await UserService.register(user);
+  const apiRes = await UserService.register(registerReqBody);
 
   return res.status(apiRes.httpCode).json(apiRes);
 }
@@ -22,20 +23,20 @@ async function register(req: IReq<RegisterRequest>, res: IRes) {
 /**
  * Change Password.
  */
-async function changePassword(req: IReq<User>, res: IRes) {
-  const user = req.body;
+async function changePassword(req: IReq<ChangePswRequest>, res: IRes) {
+  const changePswReqBody = req.body;
 
-  // const users = await UserService.changePassword(user)
-  return res.status(HttpStatusCodes.OK).end();
+  const apiRes = await UserService.changePassword(changePswReqBody);
+  return res.status(apiRes.httpCode).json(apiRes);
 }
 
 /**
  * Login.
  */
 async function login(req: IReq<LoginRequest>, res: IRes) {
-  const user = req.body;
+  const loginReqBody = req.body;
 
-  const apiRes = await UserService.login(user);
+  const apiRes = await UserService.login(loginReqBody);
   return res.status(apiRes.httpCode).json(apiRes);
 }
 
@@ -53,6 +54,7 @@ async function login(req: IReq<LoginRequest>, res: IRes) {
 export default {
   register,
   login,
+  changePassword,
   // getAll,
   // add,
   // update,
