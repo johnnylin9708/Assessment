@@ -27,13 +27,12 @@ const app = express();
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
   cors: {
-    origin: "wss://chatting-frontend-3gvu.onrender.com",
+    origin: "https://chatting-frontend-3gvu.onrender.com",
     methods: ["GET", "POST"],
     credentials: true,
   },
 });
 const mongoose = require("mongoose");
-const cors = require("cors");
 
 // **** MongoDB using Mongoose
 mongoose.connect(process.env.MONGODB_CONNECT_URI, {
@@ -77,14 +76,6 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use(
-  cors({
-    origin: "https://chatting-frontend-3gvu.onrender.com",
-    methods: ["GET", "POST"],
-    credentials: true,
-  })
-);
-
 // Add APIs, must be after middleware
 app.use(Paths.Base, BaseRouter);
 
@@ -123,7 +114,7 @@ io.on("connection", (socket) => {
   });
 });
 
-httpServer.listen(EnvVars.SocketPort);
+httpServer.listen(8000);
 
 // **** Export default **** //
 
