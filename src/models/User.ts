@@ -5,9 +5,10 @@ import moment from "moment";
 // **** Types **** //
 
 export interface User {
-  userid?: string;
-  username: string;
-  password: string;
+  userId: string;
+  email: string;
+  username?: string;
+  password?: string;
   ps?: string;
   isActive?: boolean;
   avatar?: string;
@@ -19,7 +20,8 @@ export interface User {
  * Create new User.
  */
 function new_(
-  userid?: string,
+  userId?: string,
+  email?: string,
   username?: string,
   password?: string,
   ps?: string,
@@ -27,7 +29,8 @@ function new_(
   avatar?: string // id last cause usually set by db
 ): User {
   return {
-    userid: userid ?? "",
+    userId: userId ?? "",
+    email: email ?? "",
     username: username ?? "",
     password: password ?? "",
     ps: ps ?? "",

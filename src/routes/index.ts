@@ -2,8 +2,9 @@ import { Router } from "express";
 import jetValidator from "jet-validator";
 
 import Paths from "../common/Paths";
-import User from "@src/models/User";
 import UserRoutes from "./UserRoutes";
+import ConnectionRoutes from "./ConnectionRoutes";
+import MessageRoutes from "./MessageRoutes";
 
 // **** Variables **** //
 
@@ -51,6 +52,24 @@ userRouter.get(
 
 // Add UserRouter
 apiRouter.use(Paths.Users.Base, userRouter);
+
+// Connection
+const connectionRouter = Router();
+// Create Connection
+connectionRouter.post(Paths.Connection.Connect, ConnectionRoutes.connect);
+// Get All Connections
+connectionRouter.get(Paths.Connection.Query, ConnectionRoutes.query);
+
+apiRouter.use("", connectionRouter);
+
+// Message
+const messageRouter = Router();
+// Insert
+messageRouter.post(Paths.Message.Insert, MessageRoutes.insertMessage);
+// Query all message by connectionId
+messageRouter.get(Paths.Message.Query, MessageRoutes.queryMessagesById);
+
+apiRouter.use("", messageRouter);
 
 // **** Export default **** //
 

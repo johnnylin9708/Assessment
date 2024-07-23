@@ -36,7 +36,7 @@ function generateSalt() {
 /**
  * UUID
  */
-function generateUserId() {
+export function generateUUId() {
   return uuidv4();
 }
 
@@ -86,17 +86,17 @@ function verifyRefreshToken(token: string) {
  * Register one user.
  */
 async function register(registerReq: RegisterRequest): Promise<ApiResponse> {
-  const isExisted = await UserRepo.findUser(registerReq);
+  const isExisted = await UserRepo.findUserByEmail(registerReq.email);
 
   if (isExisted) {
-    return { httpCode: 409, apiMsg: "username is existed" };
+    return { httpCode: 409, apiMsg: "email is existed" };
   }
   const salt = generateSalt();
   registerReq.password = hashPassword(registerReq.password, salt);
 
   const userObj: User = {
     ...registerReq,
-    userid: generateUserId(),
+    userId: generateUUId(),
     ps: salt,
     isActive: true,
   };
@@ -109,27 +109,28 @@ async function register(registerReq: RegisterRequest): Promise<ApiResponse> {
  * Login.
  */
 async function login(loginReq: LoginRequest): Promise<LoginResponse> {
-  const existedUser = await UserRepo.findUser(loginReq);
+  const existedUser = await UserRepo.findUserByEmail(loginReq.email);
 
   if (existedUser && existedUser.ps) {
     const hashPsw = hashPassword(loginReq.password, existedUser.ps);
 
     if (
       hashPsw === existedUser.password &&
-      loginReq.username === existedUser.username
+      loginReq.email === existedUser.email
     ) {
       return {
         httpCode: 200,
+        userId: existedUser.userId,
         apiMsg: "login successfully",
         accessToken: generateAccessToken(),
         refreshToken: generateRefreshToken(),
       };
     } else {
-      return { httpCode: 204, apiMsg: "invalid password" };
+      return { httpCode: 400, apiMsg: "invalid password" };
     }
   }
 
-  return { httpCode: 204, apiMsg: "invalid username" };
+  return { httpCode: 400, apiMsg: "invalid email" };
 }
 
 /**
@@ -139,37 +140,37 @@ async function changePassword(
   changePwsReq: ChangePswRequest,
   accessToken: string
 ): Promise<ApiResponse> {
-  const verifyRes = verifyAccessToken(accessToken);
+  // const verifyRes = verifyAccessToken(accessToken);
 
-  if (!verifyRes.success) {
-    return { httpCode: 401, apiMsg: verifyRes.error };
-  }
+  // if (!verifyRes.success) {
+  //   return { httpCode: 401, apiMsg: verifyRes.error };
+  // }
 
-  const userObj = {
-    username: changePwsReq.username,
-    password: changePwsReq.oldPassword,
-  };
+  // const userObj = {
+  //   username: changePwsReq.username,
+  //   password: changePwsReq.oldPassword,
+  // };
 
-  const existedUser = await UserRepo.findUser(userObj);
+  // const existedUser = await UserRepo.findUser(userObj);
 
-  if (!existedUser || !existedUser.ps) {
-    return { httpCode: 204, apiMsg: "can't find this user" };
-  }
-  const isOldPswMatched =
-    hashPassword(changePwsReq.oldPassword, existedUser.ps) ===
-    existedUser.password;
-  if (!isOldPswMatched) {
-    return { httpCode: 409, apiMsg: "old password is invalid" };
-  }
-  const salt = generateSalt();
+  // if (!existedUser || !existedUser.ps) {
+  //   return { httpCode: 400, apiMsg: "can't find this user" };
+  // }
+  // const isOldPswMatched =
+  //   hashPassword(changePwsReq.oldPassword, existedUser.ps) ===
+  //   existedUser.password;
+  // if (!isOldPswMatched) {
+  //   return { httpCode: 409, apiMsg: "old password is invalid" };
+  // }
+  // const salt = generateSalt();
 
-  const newUserObj = {
-    userid: existedUser.userid,
-    username: existedUser.username,
-    password: hashPassword(changePwsReq.newPassword, salt),
-    ps: salt,
-  };
-  UserRepo.updateUser(newUserObj);
+  // const newUserObj = {
+  //   userId: existedUser.userId,
+  //   username: existedUser.username,
+  //   password: hashPassword(changePwsReq.newPassword, salt),
+  //   ps: salt,
+  // };
+  // UserRepo.updateUser(newUserObj);
 
   return { httpCode: 200, apiMsg: "password changed successfully" };
 }
@@ -204,7 +205,7 @@ async function getDummnyData(
   if (!verifyRes.success && verifyRes.error === "jwt expired") {
     return { httpCode: 202, apiMsg: verifyRes.error };
   } else if (!verifyRes.success && verifyRes.error === "invalid token") {
-    return { httpCode: 404, apiMsg: verifyRes.error };
+    return { httpCode: 400, apiMsg: verifyRes.error };
   }
 
   return {

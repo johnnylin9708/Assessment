@@ -1,5 +1,5 @@
 import { User } from "@src/models/User";
-import orm, { UserDocument } from "./mongodb";
+import orm, { UserDocument } from "./UserOrm";
 
 // **** Functions **** //
 
@@ -11,10 +11,17 @@ async function insertUser(user: User): Promise<UserDocument | null> {
 }
 
 /**
+ * Find one user`
+ */
+async function findUserByEmail(email: string): Promise<UserDocument | null> {
+  return await orm.findUserByEmail(email);
+}
+
+/**
  * Find one user
  */
-async function findUser(user: User): Promise<UserDocument | null> {
-  return await orm.findUser(user);
+async function findUserById(userId: string): Promise<UserDocument | null> {
+  return await orm.findUserById(userId);
 }
 
 /**
@@ -28,6 +35,7 @@ async function updateUser(user: User): Promise<UserDocument | null> {
 
 export default {
   insertUser,
-  findUser,
+  findUserByEmail,
+  findUserById,
   updateUser,
 } as const;

@@ -11,7 +11,8 @@ const client = new MongoClient(uri);
 // **** Types **** //
 
 export interface UserDocument extends Document {
-  userid: string;
+  userId: string;
+  email: string;
   username: string;
   password?: string;
   ps?: string;
@@ -26,8 +27,9 @@ export interface UserDocument extends Document {
 const UserModel = mongoose.model(
   "users",
   new Schema({
-    userid: String,
+    userId: String,
     username: String,
+    email: String,
     password: String,
     ps: String,
     isActive: Boolean,
@@ -39,9 +41,9 @@ const UserModel = mongoose.model(
  * Insert a user into Document.
  */
 async function insertUser(data: {
-  userid?: string;
-  username: string;
-  password: string;
+  userId?: string;
+  username?: string;
+  password?: string;
   ps?: string;
   isActive?: boolean;
   avatar?: string;
@@ -61,17 +63,27 @@ async function insertUser(data: {
 /**
  * Get a user.
  */
-async function findUser(data: {
-  userid?: string;
-  username: string;
-  password: string;
-  ps?: string;
-  isActive?: boolean;
-  avatar?: string;
-}) {
+async function findUserByEmail(email: string) {
+  try {
+    console.log(email);
+    return (await UserModel.findOne({
+      email,
+    })) as unknown as UserDocument;
+  } catch (error) {
+    console.log(error);
+    return null;
+  } finally {
+    await client.close();
+  }
+}
+
+/**
+ * Get a user.
+ */
+async function findUserById(userId: string) {
   try {
     return (await UserModel.findOne({
-      username: data.username,
+      userId,
     })) as unknown as UserDocument;
   } catch (error) {
     console.log(error);
@@ -85,16 +97,16 @@ async function findUser(data: {
  * Update user info.
  */
 async function updateUser(data: {
-  userid?: string;
-  username: string;
-  password: string;
+  userId?: string;
+  username?: string;
+  password?: string;
   ps?: string;
   isActive?: boolean;
   avatar?: string;
 }) {
   try {
     return (await UserModel.updateOne(
-      { userid: data.userid },
+      { userId: data.userId },
       {
         $set: {
           password: data.password,
@@ -115,6 +127,7 @@ async function updateUser(data: {
 
 export default {
   insertUser,
-  findUser,
+  findUserByEmail,
+  findUserById,
   updateUser,
 } as const;

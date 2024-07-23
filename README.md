@@ -53,7 +53,7 @@ FYI: Database is set up in the cloud. It can be use directly.
    ```
 3. Run
    ```sh
-   docker run -p 3000:3000 assessment
+   docker run -p 8080:8080 assessment
    ```
 4. Stop
    ```sh

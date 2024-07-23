@@ -8,6 +8,7 @@ import path from "path";
 import helmet from "helmet";
 import express, { Request, Response, NextFunction } from "express";
 import logger from "jet-logger";
+import { Server } from "socket.io";
 
 import "express-async-errors";
 
@@ -18,12 +19,16 @@ import EnvVars from "@src/common/EnvVars";
 import HttpStatusCodes from "@src/common/HttpStatusCodes";
 import RouteError from "@src/common/RouteError";
 import { NodeEnvs } from "@src/common/misc";
-import UserRoutes from "./routes/UserRoutes";
 
 // **** Variables **** //
 
 const app = express();
-
+const io = new Server({
+  cors: {
+    origin: EnvVars.FrontUrl,
+    methods: ["GET", "POST"],
+  },
+});
 const mongoose = require("mongoose");
 
 // **** MongoDB using Mongoose
@@ -57,6 +62,17 @@ if (EnvVars.NodeEnv === NodeEnvs.Production.valueOf()) {
   app.use(helmet());
 }
 
+// CORS
+app.use((req, res, next) => {
+  res.setHeader("Access-Control-Allow-Origin", EnvVars.FrontUrl);
+  res.setHeader(
+    "Access-Control-Allow-Methods",
+    "GET, POST, PUT, DELETE, OPTIONS"
+  );
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  next();
+});
+
 // Add APIs, must be after middleware
 app.use(Paths.Base, BaseRouter);
 
@@ -79,6 +95,23 @@ app.use(
     return res.status(status).json({ error: err.message });
   }
 );
+
+// socket
+io.on("connection", (socket) => {
+  socket.on("join", (userId) => {
+    socket.join(userId);
+  });
+
+  socket.on("chatMessage", (data) => {
+    io.to(data.receiverId).emit("chatMessage", data);
+  });
+
+  socket.on("disconnect", () => {
+    console.log("user disconnected");
+  });
+});
+
+io.listen(8000);
 
 // **** Export default **** //
 

@@ -12,4 +12,12 @@ export default {
     ValidateRefreshToken: "/validate-refresh-token",
     DummnyData: "/dummny-data",
   },
+  Connection: {
+    Connect: "/connect",
+    Query: "/connections/:userId",
+  },
+  Message: {
+    Insert: "/message",
+    Query: "/messages/:connectionId",
+  },
 } as const;
