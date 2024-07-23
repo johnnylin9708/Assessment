@@ -31,6 +31,7 @@ const io = new Server({
   },
 });
 const mongoose = require("mongoose");
+const cors = require("cors");
 
 // **** MongoDB using Mongoose
 mongoose.connect(process.env.MONGODB_CONNECT_URI, {
@@ -73,6 +74,14 @@ app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
   next();
 });
+
+app.use(
+  cors({
+    origin: "https://chatting-frontend-3gvu.onrender.com", // 替換成你前端的 origin
+    methods: ["GET", "POST"],
+    credentials: true, // 允許攜帶 cookies
+  })
+);
 
 // Add APIs, must be after middleware
 app.use(Paths.Base, BaseRouter);
