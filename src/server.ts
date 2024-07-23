@@ -19,11 +19,13 @@ import EnvVars from "@src/common/EnvVars";
 import HttpStatusCodes from "@src/common/HttpStatusCodes";
 import RouteError from "@src/common/RouteError";
 import { NodeEnvs } from "@src/common/misc";
+import { createServer } from "http";
 
 // **** Variables **** //
 
 const app = express();
-const io = new Server({
+const httpServer = createServer(app);
+const io = new Server(httpServer, {
   cors: {
     origin: "https://chatting-frontend-3gvu.onrender.com",
     methods: ["GET", "POST"],
@@ -121,7 +123,7 @@ io.on("connection", (socket) => {
   });
 });
 
-io.listen(EnvVars.SocketPort);
+httpServer.listen(EnvVars.SocketPort);
 
 // **** Export default **** //
 
