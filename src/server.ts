@@ -25,8 +25,9 @@ import { NodeEnvs } from "@src/common/misc";
 const app = express();
 const io = new Server({
   cors: {
-    origin: EnvVars.FrontUrl,
+    origin: "https://chatting-frontend-3gvu.onrender.com",
     methods: ["GET", "POST"],
+    credentials: true,
   },
 });
 const mongoose = require("mongoose");
