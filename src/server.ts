@@ -111,7 +111,7 @@ io.on("connection", (socket) => {
   });
 });
 
-io.listen(8000);
+io.listen(EnvVars.SocketPort);
 
 // **** Export default **** //
 
