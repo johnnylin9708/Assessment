@@ -24,14 +24,8 @@ import { createServer } from "http";
 // **** Variables **** //
 
 const app = express();
-const httpServer = createServer(app);
-const io = new Server(httpServer, {
-  cors: {
-    origin: "https://chatting-frontend-3gvu.onrender.com",
-    methods: ["GET", "POST"],
-    credentials: true,
-  },
-});
+const cors = require("cors");
+
 const mongoose = require("mongoose");
 
 // **** MongoDB using Mongoose
@@ -66,15 +60,16 @@ if (EnvVars.NodeEnv === NodeEnvs.Production.valueOf()) {
 }
 
 // CORS
-app.use((req, res, next) => {
-  res.setHeader("Access-Control-Allow-Origin", EnvVars.FrontUrl);
-  res.setHeader(
-    "Access-Control-Allow-Methods",
-    "GET, POST, PUT, DELETE, OPTIONS"
-  );
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
-  next();
-});
+app.use(cors({ origin: "*", credentials: true }));
+// app.use((req, res, next) => {
+//   res.setHeader("Access-Control-Allow-Origin", "*");
+//   res.setHeader(
+//     "Access-Control-Allow-Methods",
+//     "GET, POST, PUT, DELETE, OPTIONS"
+//   );
+//   res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+//   next();
+// });
 
 // Add APIs, must be after middleware
 app.use(Paths.Base, BaseRouter);
@@ -98,23 +93,8 @@ app.use(
     return res.status(status).json({ error: err.message });
   }
 );
-
-// socket
-io.on("connection", (socket) => {
-  socket.on("join", (userId) => {
-    socket.join(userId);
-  });
-
-  socket.on("chatMessage", (data) => {
-    io.to(data.receiverId).emit("chatMessage", data);
-  });
-
-  socket.on("disconnect", () => {
-    console.log("user disconnected");
-  });
-});
-
-httpServer.listen(8000);
+const SERVER_START_MSG =
+  "Express server started on port: " + EnvVars.Port.toString();
 
 // **** Export default **** //
 
