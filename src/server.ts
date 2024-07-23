@@ -27,7 +27,7 @@ const app = express();
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
   cors: {
-    origin: "https://chatting-frontend-3gvu.onrender.com",
+    origin: "wss://chatting-frontend-3gvu.onrender.com",
     methods: ["GET", "POST"],
     credentials: true,
   },
@@ -79,9 +79,9 @@ app.use((req, res, next) => {
 
 app.use(
   cors({
-    origin: "https://chatting-frontend-3gvu.onrender.com", // 替換成你前端的 origin
+    origin: "https://chatting-frontend-3gvu.onrender.com",
     methods: ["GET", "POST"],
-    credentials: true, // 允許攜帶 cookies
+    credentials: true,
   })
 );
 
