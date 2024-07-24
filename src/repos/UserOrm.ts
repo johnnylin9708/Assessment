@@ -13,7 +13,7 @@ const client = new MongoClient(uri);
 export interface UserDocument extends Document {
   userId: string;
   email: string;
-  username: string;
+  userName: string;
   password?: string;
   ps?: string;
   isActive?: boolean;
@@ -28,7 +28,7 @@ const UserModel = mongoose.model(
   "users",
   new Schema({
     userId: String,
-    username: String,
+    userName: String,
     email: String,
     password: String,
     ps: String,
@@ -42,7 +42,7 @@ const UserModel = mongoose.model(
  */
 async function insertUser(data: {
   userId?: string;
-  username?: string;
+  userName?: string;
   password?: string;
   ps?: string;
   isActive?: boolean;
@@ -65,7 +65,6 @@ async function insertUser(data: {
  */
 async function findUserByEmail(email: string) {
   try {
-    console.log(email);
     return (await UserModel.findOne({
       email,
     })) as unknown as UserDocument;
@@ -98,7 +97,7 @@ async function findUserById(userId: string) {
  */
 async function updateUser(data: {
   userId?: string;
-  username?: string;
+  userName?: string;
   password?: string;
   ps?: string;
   isActive?: boolean;
