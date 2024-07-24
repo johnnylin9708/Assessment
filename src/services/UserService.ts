@@ -102,7 +102,10 @@ async function register(registerReq: RegisterRequest): Promise<ApiResponse> {
   };
 
   await UserRepo.insertUser(userObj);
-  return { httpCode: 201, apiMsg: "register successfully" };
+  return {
+    httpCode: 201,
+    apiMsg: "Registration successful! Please proceed to the login page",
+  };
 }
 
 /**
@@ -124,13 +127,21 @@ async function login(loginReq: LoginRequest): Promise<LoginResponse> {
         apiMsg: "login successfully",
         accessToken: generateAccessToken(),
         refreshToken: generateRefreshToken(),
+        userName: existedUser.userName,
       };
     } else {
-      return { httpCode: 400, apiMsg: "invalid password" };
+      return {
+        httpCode: 400,
+        apiMsg:
+          "Sorry, the password you entered is incorrect. Please try again.",
+      };
     }
   }
 
-  return { httpCode: 400, apiMsg: "invalid email" };
+  return {
+    httpCode: 400,
+    apiMsg: "Sorry, the email you entered is incorrect. Please try again.",
+  };
 }
 
 /**

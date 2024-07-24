@@ -16,8 +16,10 @@ export interface ConnectionDocument extends Document {
   connectionId: string;
   userId: string;
   userEmail: string;
+  userName: string;
   friendId: string;
   friendEmail: string;
+  friendName: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -30,8 +32,10 @@ const ConnectionModel = mongoose.model(
     connectionId: String,
     userId: String,
     userEmail: String,
+    userName: String,
     friendId: String,
     friendEmail: String,
+    friendName: String,
   })
 );
 
@@ -48,8 +52,10 @@ async function insertConnection(data: ConnectRequest) {
     const doc = new ConnectionModel({
       userId,
       userEmail: userObj?.email,
+      userName: userObj?.userName,
       friendId: friendObj?.userId,
       friendEmail: friendObj?.email,
+      friendName: friendObj?.userName,
       connectionId: data.connectionId,
     });
 

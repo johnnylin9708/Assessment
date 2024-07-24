@@ -25,6 +25,9 @@ io.on("connection", (socket) => {
   socket.on("chatMessage", (data) => {
     io.to(data.receiverId).emit("chatMessage", data);
   });
+  socket.on("connections", (data) => {
+    io.emit(data.friendId, data);
+  });
 
   socket.on("disconnect", () => {
     console.log("user disconnected");

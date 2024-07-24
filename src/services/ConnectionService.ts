@@ -25,28 +25,19 @@ async function connect(connectReq: ConnectRequest): Promise<ApiResponse> {
   if (connectObj) {
     return { httpCode: 409, apiMsg: "duplicate friends" };
   }
-
-  await ConnectionRepo.insertConnection({
+  const newConnectionObj = {
     ...connectReq,
     connectionId: generateUUId(),
-  });
-  //   const isExisted = await UserRepo.findUser(registerReq);
+  };
+  const insertConnectionRes = await ConnectionRepo.insertConnection(
+    newConnectionObj
+  );
 
-  //   if (isExisted) {
-  //     return { httpCode: 409, apiMsg: "username is existed" };
-  //   }
-  //   const salt = generateSalt();
-  //   registerReq.password = hashPassword(registerReq.password, salt);
-
-  //   const userObj: User = {
-  //     ...registerReq,
-  //     userId: generateuserId(),
-  //     ps: salt,
-  //     isActive: true,
-  //   };
-
-  //   await UserRepo.insertUser(userObj);
-  return { httpCode: 201, apiMsg: "create connection successfully" };
+  return {
+    httpCode: 201,
+    apiMsg: "create connection successfully",
+    data: insertConnectionRes,
+  };
 }
 
 /**
